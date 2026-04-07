@@ -1,0 +1,28 @@
+# bqueue.hny
+
+def BQueue(n) returns q:
+    q = { .arr: [], .max: n }
+
+def bq_put(q, v):
+    atomically:
+        while len(q->arr) >= q->max:
+            pass
+        q->arr += [v,]
+
+def bq_get(q) returns v:
+    atomically:
+        while len(q->arr) == 0:
+            pass
+        let x = q->arr[0]:
+            del q->arr[0]
+            v = x
+
+def bq_peek(q) returns v:
+    atomically:
+        while len(q->arr) == 0:
+            pass
+        v = q->arr[0]
+
+def bq_clear(q):
+    atomically:
+        q->arr = []
