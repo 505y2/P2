@@ -1,0 +1,6 @@
+# Harmony model checker output files
+*.hfa
+*.hco
+*.hvm
+*.htm
+*.hvb

@@ -5,7 +5,7 @@ const NPUT = 1
 const NGET = 1
 const NPEEK = 0
 const NCLEAR = 0
-const NPRE = 1
+const NPRE = 0
 
 myq = bqueue.BQueue(SIZE)
 
