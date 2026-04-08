@@ -1,54 +1,68 @@
-# bqueue_impl.hny
-
-from synch import Lock, acquire, release, Condition, wait, notifyAll
+from synch import Lock, Condition, acquire, release, wait, notify, notifyAll
 
 def BQueue(n) returns q:
     q = {
-        .arr: [None,] * n,
         .max: n,
+        .buf: [None,] * n,
         .head: 0,
         .tail: 0,
         .size: 0,
         .lock: Lock(),
         .not_full: Condition(),
-        .not_empty: Condition()
+        .can_get: Condition(),
+        .can_peek: Condition()
     }
 
 def bq_put(q, v):
     acquire(?q->lock)
+
     while q->size == q->max:
         wait(?q->not_full, ?q->lock)
 
-    q->arr[q->tail] = v
+    q->buf[q->tail] = v
     q->tail = (q->tail + 1) % q->max
     q->size += 1
 
-    notifyAll(?q->not_empty)
+    notify(?q->can_get)
+    notifyAll(?q->can_peek)
+
     release(?q->lock)
 
 def bq_get(q) returns v:
     acquire(?q->lock)
-    while q->size == 0:
-        wait(?q->not_empty, ?q->lock)
 
-    v = q->arr[q->head]
+    while q->size == 0:
+        wait(?q->can_get, ?q->lock)
+
+    v = q->buf[q->head]
+    q->buf[q->head] = None
     q->head = (q->head + 1) % q->max
     q->size -= 1
 
-    notifyAll(?q->not_full)
+    notify(?q->not_full)
+    if q->size > 0:
+        notify(?q->can_get)
+        notifyAll(?q->can_peek)
+
     release(?q->lock)
 
 def bq_peek(q) returns v:
     acquire(?q->lock)
-    while q->size == 0:
-        wait(?q->not_empty, ?q->lock)
 
-    v = q->arr[q->head]
+    while q->size == 0:
+        wait(?q->can_peek, ?q->lock)
+
+    v = q->buf[q->head]
 
     release(?q->lock)
 
 def bq_clear(q):
     acquire(?q->lock)
+
+    var i = 0
+    while i < q->max:
+        q->buf[i] = None
+        i += 1
 
     q->head = 0
     q->tail = 0

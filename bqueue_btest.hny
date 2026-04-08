@@ -1,41 +1,47 @@
 import bqueue
 
-const SIZE = 1
-const NPUT = 2
-const NGET = 2
-const NPEEK = 1
-const NCLEAR = 1
+const SIZE = 2
+const NPUT = 1
+const NGET = 1
+const NPEEK = 0
+const NCLEAR = 0
+const NPRE = 1
 
 myq = bqueue.BQueue(SIZE)
 
+var pre = 0
+while pre < NPRE:
+    bqueue.bq_put(?myq, 100 + pre)
+    pre += 1
+
 def put_thread(tid):
-    print(tid, "invoke put")
+    print(tid, "invoke", "put")
     bqueue.bq_put(?myq, tid)
-    print(tid, "complete put")
+    print(tid, "complete", "put", tid)
 
 def get_thread(tid):
-    print(tid, "invoke get")
-    var r = bqueue.bq_get(?myq)
-    print(tid, "complete get", r)
+    print(tid, "invoke", "get")
+    let v = bqueue.bq_get(?myq):
+        print(tid, "complete", "get", v)
 
 def peek_thread(tid):
-    print(tid, "invoke peek")
-    var r = bqueue.bq_peek(?myq)
-    print(tid, "complete peek", r)
+    print(tid, "invoke", "peek")
+    let v = bqueue.bq_peek(?myq):
+        print(tid, "complete", "peek", v)
 
 def clear_thread(tid):
-    print(tid, "invoke clear")
+    print(tid, "invoke", "clear")
     bqueue.bq_clear(?myq)
-    print(tid, "complete clear")
+    print(tid, "complete", "clear")
 
-for i in {0..NPUT-1}:
-    spawn put_thread(i)
+for p in {0..NPUT-1}:
+    spawn put_thread(p)
 
-for j in {0..NGET-1}:
-    spawn get_thread(j)
+for g in {0..NGET-1}:
+    spawn get_thread(g)
 
 for k in {0..NPEEK-1}:
     spawn peek_thread(k)
 
-for m in {0..NCLEAR-1}:
-    spawn clear_thread(m)
+for c in {0..NCLEAR-1}:
+    spawn clear_thread(c)
