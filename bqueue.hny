@@ -1,25 +1,19 @@
 def BQueue(n) returns q:
     q = { .max: n, .items: [] }
 
-def bq_put(q, v):
-    atomically:
-        while len(q->items) >= q->max:
-            pass
-        q->items += [v,]
+def bq_put(bq, v):
+    atomically when len(bq->items) < bq->max:
+        bq->items += [v,]
 
-def bq_get(q) returns v:
-    atomically:
-        while len(q->items) == 0:
-            pass
-        v = q->items[0]
-        del q->items[0]
+def bq_get(bq) returns v:
+    atomically when len(bq->items) > 0:
+        v = bq->items[0]
+        del bq->items[0]
 
-def bq_peek(q) returns v:
-    atomically:
-        while len(q->items) == 0:
-            pass
-        v = q->items[0]
+def bq_peek(bq) returns v:
+    atomically when len(bq->items) > 0:
+        v = bq->items[0]
 
-def bq_clear(q):
+def bq_clear(bq):
     atomically:
-        q->items = []
+        bq->items = []
